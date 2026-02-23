@@ -27,6 +27,9 @@ if location and "location" not in st.session_state:
     st.session_state["lat"] = coords.get("latitude")
     st.session_state["lon"] = coords.get("longitude")
 
+    timestamp = location.get("timestamp", {})
+    st.session_state["timestamp"] = timestamp
+
 
     st.rerun()
 
@@ -135,11 +138,15 @@ emojis = ["😡", "🙁", "😐", "🙂", "😁"]  # larger-face friendly variat
 values = [1, 2, 3, 4, 5]
 
 for col, emoji, val in zip([col1, col2, col3, col4, col5], emojis, values):
+
     if col.button(emoji, key=f"btn_{val}", help="Tap to give feedback", type="primary"):
 
+        utc_time = datetime.now()
+
         if "lat" in st.session_state and "lon" in st.session_state:
-            st.success(f"Latitude: {st.session_state['lat']}, Longitude: {st.session_state['lon']}")
-            print(st.session_state["location"])
+            #st.success(f"Latitude: {st.session_state['lat']}, Longitude: {st.session_state['lon']}")
+            print(st.session_state["lat"])
+            print(st.session_state["lon"])
             print(st.session_state["accuracy"])
         feedback_data = {
             "device_id": DeviceID.data[0]["device_id"],
@@ -153,6 +160,7 @@ for col, emoji, val in zip([col1, col2, col3, col4, col5], emojis, values):
         print("Feedback data to insert:", feedback_data)
         try:
             insert_feedback(feedback_data)
+            print(utc_time)
             st.success(f"Thank you! Your feedback rating was: {val}")
         except Exception as e:
             st.error(f"Error saving feedback: {e}")
