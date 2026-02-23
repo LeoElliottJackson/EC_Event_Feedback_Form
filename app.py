@@ -1,4 +1,12 @@
 import streamlit as st
+from pathlib import Path
+from streamlit_js_eval import get_geolocation
+
+
+BASE_DIR = Path(__file__).resolve().parent
+ASSETS_DIR = BASE_DIR / "assets"
+
+smiley = ASSETS_DIR / "smiley.png"
 
 # ---------- APP STATE ----------
 if "theme" not in st.session_state:
@@ -6,6 +14,19 @@ if "theme" not in st.session_state:
 
 def toggle_theme():
     st.session_state.theme = "dark" if st.session_state.theme == "light" else "light"
+
+location = get_geolocation()
+
+if location and "location" not in st.session_state:
+    coords = location.get("coords", {})
+
+    st.session_state["location"] = location
+    st.session_state["accuracy"] = coords.get("accuracy")
+    st.session_state["lat"] = coords.get("latitude")
+    st.session_state["lon"] = coords.get("longitude")
+
+
+    st.rerun()
 
 
 # ---------- THEME CSS ----------
@@ -113,4 +134,9 @@ values = [1, 2, 3, 4, 5]
 
 for col, emoji, val in zip([col1, col2, col3, col4, col5], emojis, values):
     if col.button(emoji, key=f"btn_{val}", help="Tap to give feedback", type="primary"):
+
+        if "lat" in st.session_state and "lon" in st.session_state:
+            st.success(f"Latitude: {st.session_state['lat']}, Longitude: {st.session_state['lon']}")
+            print(st.session_state["location"])
+            print(st.session_state["accuracy"])
         st.success(f"Thank you! Your feedback rating was: {val}")
