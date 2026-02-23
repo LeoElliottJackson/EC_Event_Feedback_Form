@@ -1,6 +1,7 @@
 import streamlit as st
 from pathlib import Path
 from streamlit_js_eval import get_geolocation
+from datetime import datetime
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -24,6 +25,9 @@ if location and "location" not in st.session_state:
     st.session_state["accuracy"] = coords.get("accuracy")
     st.session_state["lat"] = coords.get("latitude")
     st.session_state["lon"] = coords.get("longitude")
+
+    timestamp = location.get("timestamp", {})
+    st.session_state["timestamp"] = timestamp
 
 
     st.rerun()
@@ -133,10 +137,19 @@ emojis = ["😡", "🙁", "😐", "🙂", "😁"]  # larger-face friendly variat
 values = [1, 2, 3, 4, 5]
 
 for col, emoji, val in zip([col1, col2, col3, col4, col5], emojis, values):
+
     if col.button(emoji, key=f"btn_{val}", help="Tap to give feedback", type="primary"):
 
+        utc_time = datetime.now()
+
         if "lat" in st.session_state and "lon" in st.session_state:
-            st.success(f"Latitude: {st.session_state['lat']}, Longitude: {st.session_state['lon']}")
-            print(st.session_state["location"])
+            #st.success(f"Latitude: {st.session_state['lat']}, Longitude: {st.session_state['lon']}")
+            print(st.session_state["lat"])
+            print(st.session_state["lon"])
             print(st.session_state["accuracy"])
+
+
+        
+        print(utc_time)
+
         st.success(f"Thank you! Your feedback rating was: {val}")
