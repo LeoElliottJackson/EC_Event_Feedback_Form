@@ -21,5 +21,11 @@ def get_supabase():
 
     return create_client(url, key, options)
 
+def insert_feedback(feedback_data):
+    response = supabase.table("feedback_event").insert(feedback_data).execute()
+    if response.status_code != 201:
+        raise RuntimeError(f"Failed to insert feedback: {response.text}")
 # Create reusable singleton client
 supabase = get_supabase()
+DeviceID = supabase.table("device").select("device_id").eq("name", "Stand #1").execute()
+print(DeviceID)

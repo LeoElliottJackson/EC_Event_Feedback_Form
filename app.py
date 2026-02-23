@@ -1,6 +1,8 @@
 import streamlit as st
 from pathlib import Path
 from streamlit_js_eval import get_geolocation
+from db import insert_feedback, DeviceID
+from datetime import datetime
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -139,4 +141,18 @@ for col, emoji, val in zip([col1, col2, col3, col4, col5], emojis, values):
             st.success(f"Latitude: {st.session_state['lat']}, Longitude: {st.session_state['lon']}")
             print(st.session_state["location"])
             print(st.session_state["accuracy"])
-        st.success(f"Thank you! Your feedback rating was: {val}")
+        feedback_data = {
+            "device_id": DeviceID.data[0]["device_id"],
+            "feedback_value": val,
+            "timestamp_utc": datetime.fromtimestamp(st.session_state.get("location", {}).get("timestamp", 0) / 1000).isoformat(),
+            "timezone_offset_minutes": 0,
+            "latitude": st.session_state.get("lat"),
+            "longitude": st.session_state.get("lon"),
+            "location_accuracy": st.session_state.get("accuracy"),
+        }
+        print("Feedback data to insert:", feedback_data)
+        try:
+            insert_feedback(feedback_data)
+            st.success(f"Thank you! Your feedback rating was: {val}")
+        except Exception as e:
+            st.error(f"Error saving feedback: {e}")
