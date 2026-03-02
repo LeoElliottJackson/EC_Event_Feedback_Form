@@ -16,36 +16,22 @@ def get_msal_app():
 
 def login():
     if "user" in st.session_state:
-        return st.session_state["user"]
+        return
 
     msal_app = get_msal_app()
-    state = str(uuid.uuid4())
-
-    # Save state in query params so it survives redirect
-    st.query_params["expected_state"] = state
 
     auth_url = msal_app.get_authorization_request_url(
         scopes=["User.Read"],
-        redirect_uri=st.secrets["auth"]["redirect_uri"],
-        state=state,
-        response_mode="query"
+        redirect_uri=st.secrets["auth"]["redirect_uri"]
     )
 
     st.markdown(f"[Click here to sign in]({auth_url})")
-
 
 def complete_login():
     params = st.query_params
 
     if "code" not in params:
         return
-
-    expected_state = params.get("expected_state")
-    returned_state = params.get("state")
-
-    if not expected_state or returned_state != expected_state:
-        st.error("Invalid auth state")
-        st.stop()
 
     msal_app = get_msal_app()
 
@@ -64,7 +50,6 @@ def complete_login():
         st.rerun()
     else:
         st.error("Login failed")
-
 # ---------------------------------------------------------
 # MAIN APP — ORDER MATTERS!
 # ---------------------------------------------------------
