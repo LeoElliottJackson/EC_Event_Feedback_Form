@@ -6,7 +6,7 @@ BASE_DIR = Path(__file__).resolve().parent
 ASSETS_DIR = BASE_DIR / "assets"
 
 smiley = ASSETS_DIR / "smiley.png"
-dxc_logo = ASSETS_DIR / "DXC_logo.png"
+dxc_logo = ASSETS_DIR / "DXC_Logo.png"
 
 
 # -------------------------------------------------------------------
