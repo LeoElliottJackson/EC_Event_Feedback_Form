@@ -63,11 +63,18 @@ def complete_login():
 
 # Main
 hide_sidebar()
+
+st.set_page_config(page_title="Login")
+
+# 1️⃣ Handle callback FIRST before any other logic
 complete_login()
 
+# 2️⃣ If user is not logged in, show login button ONLY
 if "user" not in st.session_state:
     st.header("Sign in to continue")
     login()
     st.stop()
-else:
-    st.switch_page("pages/landing.py")
+
+# 3️⃣ If logged in, proceed to app
+st.success(f"Logged in as: {st.session_state['user']['name']}")
+st.switch_page("pages/landing.py")
