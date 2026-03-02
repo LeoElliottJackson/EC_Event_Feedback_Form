@@ -1,7 +1,7 @@
 import streamlit as st
 from helpers import hide_sidebar
 
-if not st.user.is_logged_in:
+if "user" not in st.session_state:
     st.switch_page("main.py")
 else:
     hide_sidebar()
