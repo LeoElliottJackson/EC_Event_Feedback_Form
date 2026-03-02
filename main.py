@@ -4,8 +4,7 @@ from helpers import complete_login, login
 from helpers import hide_sidebar 
 # Functions
 def remove_st_branding():
-    # ------------------ HIDE STREAMLIT STYLE ELEMENTS TEST ------------------
-    st.html(
+    st.markdown(
         """
         <script>
         window.addEventListener('load', () => {
@@ -14,7 +13,7 @@ def remove_st_branding():
         });
         </script>
         """,
-        height=0,
+        unsafe_allow_html=True
     )
 remove_st_branding()
 # Main
