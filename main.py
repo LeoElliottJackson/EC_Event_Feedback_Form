@@ -12,14 +12,14 @@ def get_msal_app():
         authority=st.secrets["auth"]["authority"]
     )
 
+
 def login():
-    # If already logged in
     if "user" in st.session_state:
         return st.session_state["user"]
 
-    # Build auth URL
     msal_app = get_msal_app()
     state = str(uuid.uuid4())
+
     auth_url = msal_app.get_authorization_request_url(
         scopes=["User.Read"],
         redirect_uri=st.secrets["auth"]["redirect_uri"],
@@ -28,31 +28,42 @@ def login():
     )
 
     st.session_state["auth_state"] = state
-    st.markdown(f"[Click here to sign in with Microsoft]({auth_url})")
+    st.markdown(f"[Click here to sign in]({auth_url})")
+
+
 
 def complete_login():
-    # Parse URL params
-    params = st.experimental_get_query_params()
+    # Read URL query parameters
+    params = st.query_params
+
+    # If no "code" param, user isn't returning from Azure yet
     if "code" not in params:
         return
 
-    if params.get("state", [""])[0] != st.session_state.get("auth_state"):
+    # Validate state parameter
+    if params.get("state", "") != st.session_state.get("auth_state"):
         st.error("Invalid auth state")
         return
 
     msal_app = get_msal_app()
+
+    # Redeem authorization code for tokens
     result = msal_app.acquire_token_by_authorization_code(
-        params["code"][0],
+        params["code"],
         scopes=["User.Read"],
         redirect_uri=st.secrets["auth"]["redirect_uri"]
     )
 
     if "id_token_claims" in result:
         st.session_state["user"] = result["id_token_claims"]
-        st.experimental_set_query_params()  # Clear query params
+
+        # 🔥 Clear query params to remove ?code=... from the URL
+        st.query_params = {}
+
         st.experimental_rerun()
     else:
         st.error("Login failed")
+
 # Main
 hide_sidebar()
 complete_login()
