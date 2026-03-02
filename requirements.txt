@@ -6,3 +6,4 @@ httpx
 datetime
 Authlib
 msal
+streamlit_js_eval
