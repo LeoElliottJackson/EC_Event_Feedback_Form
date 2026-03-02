@@ -43,13 +43,10 @@ def complete_login():
 
     if "id_token_claims" in result:
         st.session_state["user"] = result["id_token_claims"]
-
-        # Clear query params
         st.query_params.clear()
-
         st.rerun()
     else:
-        st.error("Login failed")
+        st.error(result)
 # ---------------------------------------------------------
 # MAIN APP — ORDER MATTERS!
 # ---------------------------------------------------------
