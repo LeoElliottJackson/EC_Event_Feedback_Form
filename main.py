@@ -1,10 +1,12 @@
 # Imports
 import streamlit as st
-from helpers import hide_sidebar
-import streamlit as st
 import msal
 import uuid
-# Login
+from helpers import hide_sidebar  # can only be called AFTER callback handled!!
+
+# -------------------------
+# MSAL HELPERS
+# -------------------------
 def get_msal_app():
     return msal.ConfidentialClientApplication(
         client_id=st.secrets["auth"]["client_id"],
@@ -29,22 +31,21 @@ def login():
     st.session_state["auth_state"] = state
     st.markdown(f"[Click here to sign in]({auth_url})")
 
+
 def complete_login():
-    # Read URL query parameters
     params = st.query_params
 
-    # If no "code" param, user isn't returning from Azure yet
+    # Not returning from Azure yet → do nothing
     if "code" not in params:
         return
 
-    # Validate state parameter
+    # Validate state
     if params.get("state", "") != st.session_state.get("auth_state"):
         st.error("Invalid auth state")
         return
 
     msal_app = get_msal_app()
 
-    # Redeem authorization code for tokens
     result = msal_app.acquire_token_by_authorization_code(
         params["code"],
         scopes=["User.Read"],
@@ -54,27 +55,34 @@ def complete_login():
     if "id_token_claims" in result:
         st.session_state["user"] = result["id_token_claims"]
 
-        # 🔥 Clear query params to remove ?code=... from the URL
+        # Clear ?code & ?state
         st.query_params = {}
 
+        # Force clean render with valid session
         st.experimental_rerun()
     else:
         st.error("Login failed")
 
-# Main
-hide_sidebar()
 
-st.set_page_config(page_title="Login")
+# ---------------------------------------------------------
+# MAIN APP — ORDER MATTERS!
+# ---------------------------------------------------------
 
-# 1️⃣ Handle callback FIRST before any other logic
+# 1️⃣ CALLBACK MUST RUN FIRST — BEFORE ANY UI!
 complete_login()
 
-# 2️⃣ If user is not logged in, show login button ONLY
+# 2️⃣ NOW set page config (AFTER callback)
+st.set_page_config(page_title="Login")
+
+# 3️⃣ NOW hide sidebar safely
+hide_sidebar()
+
+# 4️⃣ If not logged in, show login only
 if "user" not in st.session_state:
     st.header("Sign in to continue")
     login()
     st.stop()
 
-# 3️⃣ If logged in, proceed to app
+# 5️⃣ Logged in → redirect
 st.success(f"Logged in as: {st.session_state['user']['name']}")
 st.switch_page("pages/landing.py")
