@@ -21,6 +21,9 @@ def login():
     msal_app = get_msal_app()
     state = str(uuid.uuid4())
 
+    # Save state in query params so it survives redirect
+    st.query_params["expected_state"] = state
+
     auth_url = msal_app.get_authorization_request_url(
         scopes=["User.Read"],
         redirect_uri=st.secrets["auth"]["redirect_uri"],
@@ -28,21 +31,21 @@ def login():
         response_mode="query"
     )
 
-    st.session_state["auth_state"] = state
     st.markdown(f"[Click here to sign in]({auth_url})")
 
 
 def complete_login():
     params = st.query_params
 
-    # Not returning from Azure yet → do nothing
     if "code" not in params:
         return
 
-    # Validate state
-    if params.get("state", "") != st.session_state.get("auth_state"):
+    expected_state = params.get("expected_state")
+    returned_state = params.get("state")
+
+    if not expected_state or returned_state != expected_state:
         st.error("Invalid auth state")
-        return
+        st.stop()
 
     msal_app = get_msal_app()
 
@@ -55,14 +58,12 @@ def complete_login():
     if "id_token_claims" in result:
         st.session_state["user"] = result["id_token_claims"]
 
-        # Clear ?code & ?state
-        st.query_params = {}
+        # Clear query params
+        st.query_params.clear()
 
-        # Force clean render with valid session
-        st.experimental_rerun()
+        st.rerun()
     else:
         st.error("Login failed")
-
 
 # ---------------------------------------------------------
 # MAIN APP — ORDER MATTERS!
