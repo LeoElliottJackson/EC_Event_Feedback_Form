@@ -5,3 +5,4 @@ supabase
 httpx
 datetime
 Authlib
+msal
