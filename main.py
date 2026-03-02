@@ -12,7 +12,6 @@ def get_msal_app():
         authority=st.secrets["auth"]["authority"]
     )
 
-
 def login():
     if "user" in st.session_state:
         return st.session_state["user"]
@@ -29,8 +28,6 @@ def login():
 
     st.session_state["auth_state"] = state
     st.markdown(f"[Click here to sign in]({auth_url})")
-
-
 
 def complete_login():
     # Read URL query parameters

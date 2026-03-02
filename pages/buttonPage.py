@@ -6,7 +6,6 @@ from datetime import datetime
 from db import insert_feedback
 from helpers import hide_sidebar, dxc_logo
 
-
 if "user" not in st.session_state:
     st.switch_page("main.py")
 else:
