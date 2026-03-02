@@ -1,7 +1,7 @@
 # Imports
 import streamlit as st
 from helpers import complete_login, login
-from helpers import hide_sidebar  # can only be called AFTER callback handled!!
+from helpers import hide_sidebar 
 # Functions
 def remove_st_branding():
     # ------------------ HIDE STREAMLIT STYLE ELEMENTS TEST ------------------
@@ -16,6 +16,7 @@ def remove_st_branding():
         """,
         height=0,
     )
+remove_st_branding()
 # Main
 complete_login()
 
